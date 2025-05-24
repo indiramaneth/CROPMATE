@@ -7,7 +7,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Truck, Clock, CheckCircle, ArrowRight, Package } from "lucide-react";
+import {
+  Truck,
+  Clock,
+  CheckCircle,
+  ArrowRight,
+  Package,
+  SendHorizonal,
+  Bell,
+} from "lucide-react";
 import { getDriverStats } from "@/lib/actions/user.actions";
 import { getRecentDeliveries } from "@/lib/actions/delivery.actions";
 import OrderStatusBadge from "@/components/orders/status-badge";
@@ -74,7 +82,6 @@ export default async function DriverDashboardPage() {
             </div>
           </CardContent>
         </Card>
-
         <Card className="border-l-4 border-l-amber-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
             <CardTitle className="text-sm font-medium">
@@ -89,9 +96,8 @@ export default async function DriverDashboardPage() {
               {stats.pendingPickups}
             </div>
           </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-green-500 sm:col-span-2 lg:col-span-1">
+        </Card>{" "}
+        <Card className="border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
             <CardTitle className="text-sm font-medium">
               Completed Today
@@ -104,6 +110,35 @@ export default async function DriverDashboardPage() {
             <div className="text-xl sm:text-2xl font-bold text-green-500">
               {stats.completedToday}
             </div>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-purple-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-sm font-medium">
+              Pending Requests
+            </CardTitle>
+            <div className="h-8 w-8 rounded-full bg-purple-50 dark:bg-purple-950/50 flex items-center justify-center">
+              <SendHorizonal className="h-4 w-4 text-purple-500" />
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-purple-500">
+              {stats.pendingRequests || 0}
+            </div>
+            {stats.pendingRequests > 0 && (
+              <div className="mt-2">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                >
+                  <Link href="/dashboard/driver/delivery-requests">
+                    View Requests
+                  </Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

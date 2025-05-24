@@ -140,13 +140,17 @@ export default async function DriverEarningsPage() {
                       <TableCell className="font-mono text-xs">
                         {delivery.orderId.substring(0, 8)}...
                       </TableCell>
-                      <TableCell>{delivery.order.crop.name}</TableCell>
+                      <TableCell>{delivery.order.crop.name}</TableCell>{" "}
                       <TableCell>
                         {delivery.order.quantity} {delivery.order.crop.unit}
                       </TableCell>
                       <TableCell>{delivery.order.buyer.name}</TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatCurrency(delivery.order.driverPayment)}
+                        {formatCurrency(
+                          delivery.requests && delivery.requests.length > 0
+                            ? delivery.requests[0].customFee
+                            : delivery.order.driverPayment
+                        )}
                       </TableCell>
                       <TableCell>
                         <Link

@@ -94,9 +94,9 @@ export function PaymentProofModal({
               <p>You will receive:</p>
               <p className="font-bold text-2xl text-green-600 mt-2">
                 {formatCurrency(farmerPayment)}
-              </p>
+              </p>{" "}
               <p className="text-sm text-gray-500 mt-2">
-                (85% of total payment)
+                (95% of total payment)
               </p>
             </div>
             <p className="text-gray-600">

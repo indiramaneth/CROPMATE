@@ -101,3 +101,9 @@ export const deliverySchema = z.object({
     "CANCELLED",
   ]),
 });
+
+export const deliveryRequestSchema = z.object({
+  deliveryId: z.string().min(1),
+  customFee: z.number().min(0),
+  message: z.string().optional(),
+});

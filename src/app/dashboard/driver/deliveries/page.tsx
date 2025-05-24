@@ -10,14 +10,14 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Package, Plus, Truck } from "lucide-react";
+import { Package, Plus, Truck, SendHorizonal } from "lucide-react";
 
 export default async function DriverDeliveriesPage() {
   const deliveries = await getDriverDeliveries({});
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
-      {/* Enhanced header section */}
+      {/* Enhanced header section */}{" "}
       <div className="flex flex-col gap-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -33,15 +33,26 @@ export default async function DriverDeliveriesPage() {
               </p>
             </div>
           </div>
-          <Button asChild className="gap-2 w-full sm:w-auto">
-            <Link href="/dashboard/driver/deliveries/available">
-              <Plus className="h-4 w-4" />
-              <span className="whitespace-nowrap">Available Deliveries</span>
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button asChild className="gap-2 w-full sm:w-auto">
+              <Link href="/dashboard/driver/deliveries/available">
+                <Plus className="h-4 w-4" />
+                <span className="whitespace-nowrap">Available Deliveries</span>
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="gap-2 w-full sm:w-auto"
+            >
+              <Link href="/dashboard/driver/delivery-requests">
+                <SendHorizonal className="h-4 w-4" />
+                <span className="whitespace-nowrap">My Requests</span>
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
-
       <Card className="border-primary/10 shadow-md overflow-hidden">
         <CardHeader className="pb-3 border-b">
           <CardTitle className="text-lg sm:text-xl">

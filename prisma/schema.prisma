@@ -16,18 +16,19 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  email       String   @unique
-  password    String
-  name        String
-  role        Role     @default(CUSTOMER)
-  address     String?
-  bankDetails BankDetails?
-  crops       Crop[]
-  orders      Order[]
-  deliveries  Delivery[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  email            String            @unique
+  password         String
+  name             String
+  role             Role              @default(CUSTOMER)
+  address          String?
+  bankDetails      BankDetails?
+  crops            Crop[]
+  orders           Order[]
+  deliveries       Delivery[]
+  deliveryRequests DeliveryRequest[] @relation("driverRequests")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 enum Role {
@@ -77,8 +78,8 @@ model Order {
   quantity       Float
   totalPrice     Float
   adminPayment   Float    // 5% of total price
-  driverPayment  Float    // 10% of total price
-  farmerPayment  Float    // 85% of total price
+  driverPayment  Float    // No longer used - drivers use customFee instead
+  farmerPayment  Float    // 95% of total price
   status         OrderStatus @default(PENDING_PAYMENT)
   deliveryAddress String
   paymentProof   String?
@@ -111,6 +112,7 @@ model Delivery {
   order       Order    @relation(fields: [orderId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  requests    DeliveryRequest[]
 }
 
 enum DeliveryStatus {
@@ -120,4 +122,23 @@ enum DeliveryStatus {
   IN_TRANSIT
   DELIVERED
   CANCELLED
+}
+
+model DeliveryRequest {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  deliveryId  String   @db.ObjectId
+  delivery    Delivery @relation(fields: [deliveryId], references: [id])
+  driverId    String   @db.ObjectId
+  driver      User     @relation(fields: [driverId], references: [id], name: "driverRequests")
+  customFee   Float    // The fee proposed by the driver
+  message     String?  // Optional message from the driver
+  status      DeliveryRequestStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum DeliveryRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }

@@ -1,8 +1,6 @@
 import {
-  confirmPayment,
   getOrderById,
   markAsReadyForDelivery,
-  rejectPayment,
 } from "@/lib/actions/order.actions";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/card";
@@ -159,37 +157,8 @@ export default async function OrderPage({ params }: PageProps) {
               )}
             </div>
           </Card>
-        </div>
-
+        </div>{" "}
         <div className="space-y-6">
-          {/* Payment Proof Section - Hidden from drivers */}
-          {order.paymentProof && !isDriver && (
-            <Card className="p-6 border shadow-sm dark:shadow-none dark:bg-card/50">
-              <h2 className="text-xl font-semibold mb-4">Payment Proof</h2>
-              <div className="relative h-64 w-full rounded-md overflow-hidden bg-muted/50 dark:bg-muted/20">
-                <Image
-                  src={order.paymentProof}
-                  alt="Payment proof"
-                  fill
-                  className="object-contain"
-                  loading="lazy"
-                />
-              </div>
-              {isFarmer && order.status === "PENDING_PAYMENT" && (
-                <div className="flex gap-2 mt-4">
-                  <form action={confirmPayment.bind(null, order.id)}>
-                    <Button type="submit">Confirm Payment</Button>
-                  </form>
-                  <form action={rejectPayment.bind(null, order.id)}>
-                    <Button type="submit" variant="destructive">
-                      Reject Payment
-                    </Button>
-                  </form>
-                </div>
-              )}
-            </Card>
-          )}
-
           {/* Farmer Actions */}
           {isFarmer && order.status === "PAYMENT_RECEIVED" && (
             <Card className="p-6 md:p-8 border shadow-sm dark:shadow-none bg-gradient-to-br from-white to-green-50 dark:from-green-950/20 dark:to-green-900/10 border-green-200 dark:border-green-800/30">

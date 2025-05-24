@@ -19,3 +19,12 @@ export function formatCurrency(amount: number) {
     currency: "USD",
   }).format(amount);
 }
+
+export function formatPrice(amount: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}

@@ -259,32 +259,40 @@ export async function getDriverStats() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const [activeDeliveries, pendingPickups, completedToday] = await Promise.all([
-    db.delivery.count({
-      where: {
-        driverId: session.user.id,
-        status: { in: ["ACCEPTED", "PICKED_UP", "IN_TRANSIT"] },
-      },
-    }),
-    db.delivery.count({
-      where: {
-        driverId: session.user.id,
-        status: "ACCEPTED",
-      },
-    }),
-    db.delivery.count({
-      where: {
-        driverId: session.user.id,
-        status: "DELIVERED",
-        updatedAt: { gte: today },
-      },
-    }),
-  ]);
+  const [activeDeliveries, pendingPickups, completedToday, pendingRequests] =
+    await Promise.all([
+      db.delivery.count({
+        where: {
+          driverId: session.user.id,
+          status: { in: ["ACCEPTED", "PICKED_UP", "IN_TRANSIT"] },
+        },
+      }),
+      db.delivery.count({
+        where: {
+          driverId: session.user.id,
+          status: "ACCEPTED",
+        },
+      }),
+      db.delivery.count({
+        where: {
+          driverId: session.user.id,
+          status: "DELIVERED",
+          updatedAt: { gte: today },
+        },
+      }),
+      db.deliveryRequest.count({
+        where: {
+          driverId: session.user.id,
+          status: "PENDING",
+        },
+      }),
+    ]);
 
   return {
     activeDeliveries,
     pendingPickups,
     completedToday,
+    pendingRequests,
     deliveriesChange: Math.floor(Math.random() * 20) + 5, // Mock growth percentage
   };
 }

@@ -9,7 +9,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { columns } from "../columns";
+import { columns } from "./columns";
 import { PackageSearch, ArrowLeft } from "lucide-react";
 
 export default async function AvailableDeliveriesPage() {

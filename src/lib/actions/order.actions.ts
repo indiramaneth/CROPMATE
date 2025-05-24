@@ -27,11 +27,10 @@ export async function createOrder({
   }
 
   const totalPrice = quantity * crop.pricePerUnit;
-
   // Calculate payment distributions
   const adminPayment = totalPrice * 0.05; // 5% for admin
-  const driverPayment = totalPrice * 0.1; // 10% for driver
-  const farmerPayment = totalPrice * 0.85; // 85% for farmer
+  const driverPayment = 0; // Driver payment is now handled through customFee in delivery requests
+  const farmerPayment = totalPrice * 0.95; // 95% for farmer (all remaining after admin fee)
 
   let paymentProofUrl = null;
   try {
@@ -129,8 +128,29 @@ export async function confirmPayment(orderId: string) {
     throw new Error("Order not found or unauthorized");
   }
 
+  // Check if the order has a valid status for confirmation
   if (order.status !== "PENDING_PAYMENT") {
-    throw new Error("Order is not in pending payment status");
+    // Log more information to help debug
+    console.log(
+      `Cannot confirm payment for order ${orderId}. Current status: ${order.status}`
+    );
+
+    // If the payment was already confirmed, we can just let it pass instead of throwing an error
+    if (
+      order.status === "PAYMENT_RECEIVED" ||
+      order.status === "READY_FOR_DELIVERY" ||
+      order.status === "IN_TRANSIT" ||
+      order.status === "DELIVERED"
+    ) {
+      console.log(
+        "Order already has payment confirmed or is in a later stage, skipping confirmation"
+      );
+      return; // Skip the update since it's already in a confirmed state
+    }
+
+    throw new Error(
+      `Order is not in pending payment status. Current status: ${order.status}`
+    );
   }
 
   await db.$transaction([

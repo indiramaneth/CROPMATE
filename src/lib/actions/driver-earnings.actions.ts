@@ -11,7 +11,7 @@ export async function getDriverEarnings() {
     throw new Error("Unauthorized");
   }
 
-  // Get all completed deliveries for the driver
+  // Get all completed deliveries and their associated delivery requests for the driver
   const deliveries = await db.delivery.findMany({
     where: {
       driverId: user.id,
@@ -33,18 +33,43 @@ export async function getDriverEarnings() {
           },
         },
       },
+      requests: {
+        where: {
+          driverId: user.id,
+          status: "ACCEPTED",
+        },
+        take: 1,
+      },
     },
     orderBy: {
       updatedAt: "desc",
     },
   });
+  // Define type for delivery with included relations
+  type DeliveryWithRelations = {
+    requests?: {
+      customFee: number;
+    }[];
+    order: {
+      driverPayment: number;
+    };
+  };
 
-  // Get the orders associated with the completed deliveries
-  const completedOrders = deliveries.map((delivery) => delivery.order);
+  // Calculate earnings based on delivery request customFee
+  // For each delivery, use the customFee from the accepted request if available
+  const calculateEarnings = (delivery: DeliveryWithRelations) => {
+    // Use the customFee from the accepted request if available
+    if (delivery.requests && delivery.requests.length > 0) {
+      return delivery.requests[0].customFee;
+    }
+
+    // Fallback to order.driverPayment for backwards compatibility with existing data
+    return delivery.order.driverPayment;
+  };
 
   // Calculate total earnings
-  const totalEarnings = completedOrders.reduce(
-    (sum, order) => sum + order.driverPayment,
+  const totalEarnings = deliveries.reduce(
+    (sum, delivery) => sum + calculateEarnings(delivery),
     0
   );
 
@@ -58,7 +83,7 @@ export async function getDriverEarnings() {
         deliveryDate.getFullYear() === now.getFullYear()
       );
     })
-    .reduce((sum, delivery) => sum + delivery.order.driverPayment, 0);
+    .reduce((sum, delivery) => sum + calculateEarnings(delivery), 0);
 
   // Get earnings by month for the past 6 months
   const sixMonthsAgo = new Date();
@@ -77,7 +102,7 @@ export async function getDriverEarnings() {
         const deliveryDate = new Date(delivery.updatedAt);
         return deliveryDate >= startOfMonth && deliveryDate <= endOfMonth;
       })
-      .reduce((sum, delivery) => sum + delivery.order.driverPayment, 0);
+      .reduce((sum, delivery) => sum + calculateEarnings(delivery), 0);
 
     const monthName = startOfMonth.toLocaleString("default", {
       month: "short",
