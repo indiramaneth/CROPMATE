@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import db from "@/lib/db";
 import { getCurrentUser } from "./user.actions";
+import { uploadImage } from "@/lib/cloudinary";
 
 export async function getDriverEarnings() {
   const user = await getCurrentUser();
@@ -44,15 +45,20 @@ export async function getDriverEarnings() {
     orderBy: {
       updatedAt: "desc",
     },
-  });
-  // Define type for delivery with included relations
+  }); // Define type for delivery with included relations
   type DeliveryWithRelations = {
     requests?: {
+      id: string;
       customFee: number;
+      adminCommissionPaid?: boolean;
+      paymentProof?: string | null;
     }[];
     order: {
       driverPayment: number;
     };
+    id: string;
+    updatedAt: Date;
+    deliveryDate?: Date | null;
   };
 
   // Calculate earnings based on delivery request customFee
@@ -112,11 +118,112 @@ export async function getDriverEarnings() {
       amount: monthlyEarning,
     });
   }
+  // Calculate admin commission to be paid by driver (2% of driver earnings)
+  const calculateAdminCommission = (delivery: DeliveryWithRelations) => {
+    const earnings = calculateEarnings(delivery);
+    return earnings * 0.02; // 2% commission for admin
+  };
+
+  // Check if admin commission has been paid
+  const isCommissionPaid = (delivery: DeliveryWithRelations) => {
+    if (delivery.requests && delivery.requests.length > 0) {
+      return !!delivery.requests[0].adminCommissionPaid;
+    }
+    return false;
+  };
+
+  // Get payment proof if available
+  const getPaymentProof = (delivery: DeliveryWithRelations) => {
+    if (delivery.requests && delivery.requests.length > 0) {
+      return delivery.requests[0].paymentProof;
+    }
+    return null;
+  };
+
+  // Get request ID
+  const getRequestId = (delivery: DeliveryWithRelations) => {
+    if (delivery.requests && delivery.requests.length > 0) {
+      return delivery.requests[0].id;
+    }
+    return null;
+  };
+
+  // Calculate total admin commission
+  const totalAdminCommission = deliveries.reduce(
+    (sum, delivery) => sum + calculateAdminCommission(delivery as any),
+    0
+  );
+
+  // Calculate unpaid admin commission
+  const unpaidAdminCommission = deliveries.reduce(
+    (sum, delivery) =>
+      sum +
+      (isCommissionPaid(delivery as any)
+        ? 0
+        : calculateAdminCommission(delivery as any)),
+    0
+  );
+
+  // Get admin bank details (dummy details for now)
+  const adminBankDetails = {
+    accountName: "CropMate Admin",
+    accountNumber: "1234567890",
+    bankName: "Agricultural Bank",
+    branch: "Main Branch",
+  };
 
   return {
     deliveries,
     totalEarnings,
     monthlyEarnings,
     earningsByMonth,
+    totalAdminCommission,
+    unpaidAdminCommission,
+    adminBankDetails,
+    pendingPayments: deliveries
+      .filter((delivery) => !isCommissionPaid(delivery as any))
+      .map((delivery) => ({
+        id: getRequestId(delivery as any) || delivery.id,
+        deliveryId: delivery.id,
+        date: delivery.deliveryDate || delivery.updatedAt,
+        amount: calculateAdminCommission(delivery as any),
+        earnings: calculateEarnings(delivery as any),
+        isPaid: isCommissionPaid(delivery as any),
+        paymentProof: getPaymentProof(delivery as any),
+      })),
   };
+}
+
+// Function to submit driver's admin commission payment proof
+export async function submitDriverAdminPayment(
+  requestId: string,
+  file: any // File upload
+) {
+  const session = await auth();
+
+  if (!session || session.user.role !== "DRIVER") {
+    throw new Error("Unauthorized");
+  }
+
+  // Upload the bank slip image
+  let paymentProofUrl = null;
+  try {
+    const result = await uploadImage(file);
+    paymentProofUrl = (result as { secure_url: string }).secure_url;
+  } catch (error) {
+    throw new Error("Failed to upload payment proof");
+  }
+
+  // Update the delivery request with payment proof
+  const updatedRequest = await db.deliveryRequest.update({
+    where: {
+      id: requestId,
+    },
+    data: {
+      paymentProof: paymentProofUrl,
+      adminCommissionPaid: true,
+    },
+  });
+
+  return updatedRequest;
 }

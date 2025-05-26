@@ -93,28 +93,34 @@ async function main() {
   const crops = [wheat, corn];
   console.log("Crops created successfully");
 
-  // Create Orders (for Customer Alice)
-  console.log("Creating orders...");
+  // Create Orders (for Customer Alice)  console.log("Creating orders...");
+  const order1TotalPrice = 50 * crops[0].pricePerUnit;
   const order1 = await prisma.order.create({
     data: {
       quantity: 50,
-      totalPrice: 50 * crops[0].pricePerUnit,
+      totalPrice: order1TotalPrice,
       status: "PENDING_PAYMENT", // Enum value from OrderStatus
       deliveryAddress: "123 Main St, Springfield",
       buyerId: users[0].id,
-      cropId: crops[0].id,
+      cropId: crops[0].id, // Adding the required fields
+      adminPayment: order1TotalPrice * 0.02, // 2% for admin
+      driverPayment: 0, // No driver payment initially
+      farmerPayment: order1TotalPrice * 0.98, // 98% for farmer
     },
   });
-
+  const order2TotalPrice = 100 * crops[1].pricePerUnit;
   const order2 = await prisma.order.create({
     data: {
       quantity: 100,
-      totalPrice: 100 * crops[1].pricePerUnit,
+      totalPrice: order2TotalPrice,
       status: "PAYMENT_RECEIVED", // Enum value from OrderStatus
       deliveryAddress: "123 Main St, Springfield",
       paymentProof: "https://example.com/payment-proof.jpg",
       buyerId: users[0].id,
-      cropId: crops[1].id,
+      cropId: crops[1].id, // Adding the required fields
+      adminPayment: order2TotalPrice * 0.02, // 2% for admin
+      driverPayment: 0, // No driver payment initially
+      farmerPayment: order2TotalPrice * 0.98, // 98% for farmer
     },
   });
 

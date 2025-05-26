@@ -49,11 +49,12 @@ export default async function AdminEarningsPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {" "}
             <div className="text-3xl font-bold text-green-600">
               {formatCurrency(totalEarnings)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Total 5% commission from all orders
+              Total 2% commission from all orders
             </p>
           </CardContent>
         </Card>

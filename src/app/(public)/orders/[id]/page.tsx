@@ -6,7 +6,6 @@ import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import OrderStatusBadge from "@/components/orders/status-badge";
 import { auth } from "@/auth";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
@@ -118,30 +117,47 @@ export default async function OrderPage({ params }: PageProps) {
                     <OrderStatusBadge status={order.delivery.status} />
                   </div>
                   {order.delivery.driver && (
-                    <div className="bg-muted/30 dark:bg-muted/10 p-4 rounded-lg">
-                      <p className="text-muted-foreground text-sm">Driver</p>
-                      <p className="font-medium text-lg flex items-center gap-2">
-                        <span className="h-6 w-6 rounded-full bg-primary/20 dark:bg-primary/10 flex items-center justify-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
-                            <circle cx="7" cy="17" r="2"></circle>
-                            <path d="M9 17h6"></path>
-                            <circle cx="17" cy="17" r="2"></circle>
-                          </svg>
-                        </span>
-                        {order.delivery.driver.name}
-                      </p>
-                    </div>
+                    <>
+                      <div className="bg-muted/30 dark:bg-muted/10 p-4 rounded-lg">
+                        <p className="text-muted-foreground text-sm">Driver</p>
+                        <p className="font-medium text-lg flex items-center gap-2">
+                          <span className="h-6 w-6 rounded-full bg-primary/20 dark:bg-primary/10 flex items-center justify-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
+                              <circle cx="7" cy="17" r="2"></circle>
+                              <path d="M9 17h6"></path>
+                              <circle cx="17" cy="17" r="2"></circle>
+                            </svg>
+                          </span>
+                          {order.delivery.driver.name}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground text-sm">
+                          Driver Fee
+                        </p>
+                        <p className="font-medium text-lg text-amber-600 dark:text-amber-400">
+                          $
+                          {order.delivery.requests
+                            ?.find(
+                              (req) =>
+                                req.driverId === order.delivery?.driverId &&
+                                req.status === "ACCEPTED"
+                            )
+                            ?.customFee?.toFixed(2) || "N/A"}
+                        </p>
+                      </div>
+                    </>
                   )}
                   {order.delivery.pickupDate && (
                     <div>

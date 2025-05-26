@@ -25,10 +25,19 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import AdminCommissionCard from "@/components/driver/admin-commission-card";
 
 export default async function DriverEarningsPage() {
-  const { deliveries, totalEarnings, monthlyEarnings, earningsByMonth } =
-    await getDriverEarnings();
+  const {
+    deliveries,
+    totalEarnings,
+    monthlyEarnings,
+    earningsByMonth,
+    totalAdminCommission,
+    unpaidAdminCommission,
+    adminBankDetails,
+    pendingPayments,
+  } = await getDriverEarnings();
 
   return (
     <div className="space-y-8">
@@ -102,9 +111,17 @@ export default async function DriverEarningsPage() {
             <p className="text-xs text-muted-foreground mt-1">
               Successfully completed deliveries
             </p>
-          </CardContent>
+          </CardContent>{" "}
         </Card>
       </div>
+
+      {/* Admin Commission Card */}
+      <AdminCommissionCard
+        totalCommission={totalAdminCommission}
+        unpaidCommission={unpaidAdminCommission}
+        adminBankDetails={adminBankDetails}
+        pendingPayments={pendingPayments}
+      />
 
       {/* Earnings Table */}
       <Card>
@@ -135,12 +152,12 @@ export default async function DriverEarningsPage() {
                       <TableCell className="font-medium">
                         {delivery.deliveryDate
                           ? formatDate(delivery.deliveryDate)
-                          : formatDate(delivery.updatedAt)}
+                          : formatDate(delivery.updatedAt)}{" "}
                       </TableCell>
                       <TableCell className="font-mono text-xs">
                         {delivery.orderId.substring(0, 8)}...
                       </TableCell>
-                      <TableCell>{delivery.order.crop.name}</TableCell>{" "}
+                      <TableCell>{delivery.order.crop.name}</TableCell>
                       <TableCell>
                         {delivery.order.quantity} {delivery.order.crop.unit}
                       </TableCell>

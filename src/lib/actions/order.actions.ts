@@ -25,12 +25,11 @@ export async function createOrder({
   if (!crop) {
     throw new Error("Crop not found");
   }
-
   const totalPrice = quantity * crop.pricePerUnit;
   // Calculate payment distributions
-  const adminPayment = totalPrice * 0.05; // 5% for admin
+  const adminPayment = totalPrice * 0.02; // 2% for admin (reduced from 5%)
   const driverPayment = 0; // Driver payment is now handled through customFee in delivery requests
-  const farmerPayment = totalPrice * 0.95; // 95% for farmer (all remaining after admin fee)
+  const farmerPayment = totalPrice * 0.98; // 98% for farmer (all remaining after admin fee)
 
   let paymentProofUrl = null;
   try {
@@ -279,6 +278,7 @@ export async function getOrderById(id: string) {
       delivery: {
         include: {
           driver: true,
+          requests: true, // Include delivery requests to get the driver fee
         },
       },
       buyer: true,

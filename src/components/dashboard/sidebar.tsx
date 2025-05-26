@@ -162,6 +162,11 @@ export default function DashboardSidebar({ role }: DashboardSidebarProps) {
       href: "/dashboard/admin/earnings",
       icon: DollarSign,
     },
+    {
+      name: "Driver Commissions",
+      href: "/dashboard/admin/driver-commissions",
+      icon: DollarSign,
+    },
   ];
 
   const links =

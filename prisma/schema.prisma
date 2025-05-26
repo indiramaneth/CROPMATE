@@ -77,9 +77,9 @@ model Order {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   quantity       Float
   totalPrice     Float
-  adminPayment   Float    // 5% of total price
+  adminPayment   Float    // 2% of total price
   driverPayment  Float    // No longer used - drivers use customFee instead
-  farmerPayment  Float    // 95% of total price
+  farmerPayment  Float    // 98% of total price
   status         OrderStatus @default(PENDING_PAYMENT)
   deliveryAddress String
   paymentProof   String?
@@ -125,16 +125,18 @@ enum DeliveryStatus {
 }
 
 model DeliveryRequest {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  deliveryId  String   @db.ObjectId
-  delivery    Delivery @relation(fields: [deliveryId], references: [id])
-  driverId    String   @db.ObjectId
-  driver      User     @relation(fields: [driverId], references: [id], name: "driverRequests")
-  customFee   Float    // The fee proposed by the driver
-  message     String?  // Optional message from the driver
-  status      DeliveryRequestStatus @default(PENDING)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  deliveryId        String   @db.ObjectId
+  delivery          Delivery @relation(fields: [deliveryId], references: [id])
+  driverId          String   @db.ObjectId
+  driver            User     @relation(fields: [driverId], references: [id], name: "driverRequests")
+  customFee         Float    // The fee proposed by the driver
+  adminCommissionPaid Boolean @default(false) // Track if 2% commission is paid to admin
+  paymentProof      String?  // URL to bank slip proof of payment
+  message           String?  // Optional message from the driver
+  status            DeliveryRequestStatus @default(PENDING)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 enum DeliveryRequestStatus {
